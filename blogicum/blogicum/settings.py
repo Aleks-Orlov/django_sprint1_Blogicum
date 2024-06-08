@@ -69,8 +69,6 @@ TEMPLATES = [
     },
 ]
 
-
-
 WSGI_APPLICATION = 'blogicum.wsgi.application'
 
 # Database
