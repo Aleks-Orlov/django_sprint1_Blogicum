@@ -1,6 +1,49 @@
-from django.shortcuts import render
+import os
+from pathlib import Path
 
-posts = [
+import pytest
+from django.template import TemplateDoesNotExist
+
+
+@pytest.fixture()
+def urlpatterns(imports_by_full_name):
+    urlpattern_paths = [
+        'pages.urls.urlpatterns', 'blog.urls.urlpatterns']
+    urlpattern_vals = [imports_by_full_name[p] for p in urlpattern_paths]
+    expected_names = [
+        ('about', 'rules'),
+        ('index', 'post_detail', 'category_posts'),
+    ]
+    expected_views = [
+        ('pages.views.about', 'pages.views.rules'),
+        ('blog.views.index', 'blog.views.post_detail',
+         'blog.views.category_posts'),
+    ]
+    return zip(
+        urlpattern_paths, urlpattern_vals, expected_names, expected_views)
+
+
+@pytest.fixture()
+def settings_app_name():
+    return 'blogicum'
+
+
+@pytest.fixture()
+def root_dir():
+    return str(Path(__file__).parent.parent)
+
+
+@pytest.fixture()
+def project_dirname():
+    return 'blogicum'
+
+
+@pytest.fixture()
+def posts():
+    return EXPECTED_POSTS
+
+
+EXPECTED_POSTS = [
     {
         'id': 0,
         'location': 'Остров отчаянья',
@@ -44,19 +87,31 @@ posts = [
 ]
 
 
-def index(request):
-    template = 'blog/index.html'
-    context = {'posts': posts}
-    return render(request, template, context)
-
-
-def post_detail(request, pk):
-    template = 'blog/detail.html'
-    context = {'post': posts[pk]}
-    return render(request, template, context)
-
-
-def category_post(request, category_slug):
-    template = 'blog/category.html'
-    context = {'blog': category_slug}
-    return render(request, template, context)
+def try_get_url(client, url: str):
+    try:
+        response = client.get(url)
+    except TemplateDoesNotExist as e:
+        raise AssertionError(
+            f'При загрузке страницы по адресу `{url}` возникла ошибка. '
+            'Убедитесь, что указанный для страницы шаблон существует '
+            'и находится в правильной директории.'
+        ) from e
+    except TypeError as e:
+        raise AssertionError(
+            f'При загрузке страницы по адресу `{url}` '
+            'возникла ошибка TypeError. '
+            'Убедитесь, что используете Path Converter '
+            'для приведения параметра строки запроса к нужному типу.'
+        ) from e
+    except Exception as e:
+        raise AssertionError(
+            f'При попытке загрузки страницы по адресу `{url}` возникла ошибка:'
+            f' {e}'
+        ) from e
+    else:
+        if response.status_code < 300:
+            return response
+        raise AssertionError(
+            f'При попытке загрузки страницы по адресу `{url}` возникла ошибка:'
+            f' {response}'
+        )

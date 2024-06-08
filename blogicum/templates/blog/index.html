@@ -6,7 +6,7 @@
 
 {% block content %}
 <h1>Лента записей</h1>
-{% for post in posts %}
+{% for post in posts reversed %}
 <hr>
 <article>
   <ul>
@@ -14,10 +14,10 @@
       Место: {{ post.location }}
     </li>
     <li>
-      Дата: {{ post.data }}
+      Дата: {{ post.date }}
     </li>
     <li>
-      Категория: <a href="{% url 'blog:category_post' post.category %}">
+      Категория: <a href="{% url 'blog:category_posts' post.category %}">
       {{ post.category }}</a>
     </li>
   </ul>

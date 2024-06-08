@@ -1,25 +1,25 @@
 {% extends "base.html" %}
 
 {% block title %}
-Остров отчаянья. {{ detail.date }}
+{{ post.location }}. {{ post.date }}
 {% endblock %}
 
 {% block content %}
 <article>
   <ul>
     <li>
-      Место: {{ detail.date }}
+      Место: {{ post.location }}
     </li>
     <li>
-      Дата: {{ detail.date }}
+      Дата: {{ post.date }}
     </li>
     <li>
-      Категория: <a href="{% url 'blog:category_post' detail.category %}">
-      {{ detail.category }}</a>
+      Категория: <a href="{% url 'blog:category_posts' post.category %}">
+      {{ post.category }}</a>
     </li>
   </ul>
-  <p>
-    {{ detail.text }}
+  <p class="col-12 col-md-5">
+    {{ post.text }}
   </p>
 </article>
 {% endblock %}
